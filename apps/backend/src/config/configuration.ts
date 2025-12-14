@@ -74,4 +74,22 @@ export default () => ({
     enableCerApiIntegration: process.env.ENABLE_CER_API_INTEGRATION === 'true',
     enableAnalytics: process.env.ENABLE_ANALYTICS === 'true',
   },
+
+  // Temporal configuration
+  temporal: {
+    address: process.env.TEMPORAL_ADDRESS || 'localhost:7233',
+    namespace: process.env.TEMPORAL_NAMESPACE || 'default',
+    taskQueue: process.env.TEMPORAL_TASK_QUEUE || 'accu-workflows',
+    maxConcurrentWorkflowPollers: parseInt(process.env.TEMPORAL_MAX_CONCURRENT_WORKFLOW_POLLERS, 10) || 2,
+    maxConcurrentActivityPollers: parseInt(process.env.TEMPORAL_MAX_CONCURRENT_ACTIVITY_POLLERS, 10) || 2,
+    maxConcurrentWorkflowExecutions: parseInt(process.env.TEMPORAL_MAX_CONCURRENT_WORKFLOW_EXECUTIONS, 10) || 100,
+    maxConcurrentActivityExecutions: parseInt(process.env.TEMPORAL_MAX_CONCURRENT_ACTIVITY_EXECUTIONS, 10) || 100,
+    tls: {
+      enabled: process.env.TEMPORAL_TLS_ENABLED === 'true',
+      serverNameOverride: process.env.TEMPORAL_TLS_SERVER_NAME,
+      rootCA: process.env.TEMPORAL_TLS_ROOT_CA,
+      clientCert: process.env.TEMPORAL_TLS_CLIENT_CERT,
+      clientKey: process.env.TEMPORAL_TLS_CLIENT_KEY,
+    },
+  },
 });

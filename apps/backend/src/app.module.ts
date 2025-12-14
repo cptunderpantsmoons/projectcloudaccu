@@ -18,6 +18,8 @@ import { CommunicationsModule } from './modules/communications/communications.mo
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { FileStorageModule } from './modules/file-storage/file-storage.module';
 import { EmailModule } from './modules/email/email.module';
+import { CerModule } from './modules/cer/cer.module';
+import { ExternalModule } from './modules/external/external.module';
 import { SearchModule } from './modules/search/search.module';
 
 @Module({
@@ -65,6 +67,8 @@ import { SearchModule } from './modules/search/search.module';
     NotificationsModule,
     FileStorageModule,
     EmailModule,
+    CerModule,
+    ExternalModule,
     SearchModule,
   ],
 })

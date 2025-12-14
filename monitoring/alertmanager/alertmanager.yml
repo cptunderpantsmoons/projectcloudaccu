@@ -1,0 +1,140 @@
+global:
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'alerts@accu-platform.com'
+  smtp_auth_username: 'alerts@accu-platform.com'
+  smtp_auth_password: '${ALERT_EMAIL_PASSWORD}'
+
+# The directory from which notification templates are read.
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# The root route on which each incoming alert enters.
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'web.hook'
+  routes:
+  # High priority alerts - immediate notification
+  - match:
+      severity: critical
+    receiver: 'critical-alerts'
+    group_wait: 0s
+    repeat_interval: 15m
+
+  # Warning alerts - less urgent
+  - match:
+      severity: warning
+    receiver: 'warning-alerts'
+    group_wait: 5m
+    repeat_interval: 2h
+
+  # Info alerts - lowest priority
+  - match:
+      severity: info
+    receiver: 'info-alerts'
+    group_wait: 10m
+    repeat_interval: 24h
+
+# Inhibition rules allow silencing one alert when firing another.
+inhibit_rules:
+  # If service is down, don't alert on related issues
+  - source_match:
+      alertname: 'ServiceDown'
+    target_match:
+      alertname: 'BackendHighResponseTime'
+    equal: ['instance']
+  
+  - source_match:
+      alertname: 'ServiceDown'
+    target_match:
+      alertname: 'BackendHighErrorRate'
+    equal: ['instance']
+
+# Set up receivers for different alert types
+receivers:
+# Default webhook receiver
+- name: 'web.hook'
+  webhook_configs:
+  - url: 'http://127.0.0.1:5001/'
+
+# Critical alerts - multiple channels
+- name: 'critical-alerts'
+  email_configs:
+  - to: 'devops@accu-platform.com'
+    subject: 'CRITICAL: {{ .GroupLabels.alertname }}'
+    body: |
+      {{ range .Alerts }}
+      Alert: {{ .Annotations.summary }}
+      Description: {{ .Annotations.description }}
+      Labels: {{ range .Labels.SortedPairs }}{{ .Name }}: {{ .Value }}{{ end }}
+      {{ end }}
+  slack_configs:
+  - api_url: '${SLACK_WEBHOOK_URL}'
+    channel: '#alerts-critical'
+    title: '🚨 CRITICAL ALERT'
+    text: |
+      {{ range .Alerts }}
+      *Alert:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Severity:* {{ .Labels.severity }}
+      *Time:* {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+      {{ end }}
+  discord_configs:
+  - webhook_url: '${DISCORD_WEBHOOK_URL}'
+    title: '🚨 CRITICAL ALERT'
+    description: |
+      {{ range .Alerts }}
+      **Alert:** {{ .Annotations.summary }}
+      **Description:** {{ .Annotations.description }}
+      **Severity:** {{ .Labels.severity }}
+      **Time:** {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+      {{ end }}
+    color: 'danger'
+
+# Warning alerts
+- name: 'warning-alerts'
+  email_configs:
+  - to: 'devops@accu-platform.com'
+    subject: 'WARNING: {{ .GroupLabels.alertname }}'
+    body: |
+      {{ range .Alerts }}
+      Alert: {{ .Annotations.summary }}
+      Description: {{ .Annotations.description }}
+      Labels: {{ range .Labels.SortedPairs }}{{ .Name }}: {{ .Value }}{{ end }}
+      {{ end }}
+  slack_configs:
+  - api_url: '${SLACK_WEBHOOK_URL}'
+    channel: '#alerts-warning'
+    title: '⚠️ WARNING'
+    text: |
+      {{ range .Alerts }}
+      *Alert:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Severity:* {{ .Labels.severity }}
+      *Time:* {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+      {{ end }}
+
+# Info alerts
+- name: 'info-alerts'
+  email_configs:
+  - to: 'devops@accu-platform.com'
+    subject: 'INFO: {{ .GroupLabels.alertname }}'
+    body: |
+      {{ range .Alerts }}
+      Alert: {{ .Annotations.summary }}
+      Description: {{ .Annotations.description }}
+      Labels: {{ range .Labels.SortedPairs }}{{ .Name }}: {{ .Value }}{{ end }}
+      {{ end }}
+  slack_configs:
+  - api_url: '${SLACK_WEBHOOK_URL}'
+    channel: '#alerts-info'
+    title: 'ℹ️ INFO'
+    text: |
+      {{ range .Alerts }}
+      *Alert:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Severity:* {{ .Labels.severity }}
+      *Time:* {{ .StartsAt.Format "2006-01-02 15:04:05 UTC" }}
+      {{ end }}

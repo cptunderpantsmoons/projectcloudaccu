@@ -1,0 +1,40 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "src",
+  "testRegex": ".*\\.integration\\.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "collectCoverageFrom": [
+    "**/*.(t|j)s"
+  ],
+  "coverageDirectory": "../coverage/integration",
+  "coverageReporters": [
+    "text",
+    "lcov",
+    "html",
+    "json"
+  ],
+  "coverageThreshold": {
+    "global": {
+      "branches": 70,
+      "functions": 70,
+      "lines": 70,
+      "statements": 70
+    }
+  },
+  "testEnvironment": "node",
+  "setupFilesAfterEnv": [
+    "<rootDir>/setup/integration-setup.ts"
+  ],
+  "setupFiles": [
+    "<rootDir>/setup/integration-env.ts"
+  ],
+  "moduleNameMapping": {
+    "^@accu/shared/(.*)$": "<rootDir>/../../packages/shared/src/$1"
+  },
+  "testTimeout": 60000,
+  "maxWorkers": "25%",
+  "verbose": true,
+  "bail": false
+}

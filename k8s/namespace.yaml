@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: accu-platform
+  labels:
+    name: accu-platform
+    environment: production
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: accu-platform-staging
+  labels:
+    name: accu-platform-staging
+    environment: staging
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: accu-platform-dev
+  labels:
+    name: accu-platform-dev
+    environment: development

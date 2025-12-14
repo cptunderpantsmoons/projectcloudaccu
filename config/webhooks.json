@@ -1,0 +1,76 @@
+{
+  "slack": {
+    "webhook_url": "${SLACK_WEBHOOK_URL}",
+    "channel": "#alerts",
+    "username": "ACCU Platform Bot",
+    "icon_emoji": ":robot_face:"
+  },
+  "discord": {
+    "webhook_url": "${DISCORD_WEBHOOK_URL}",
+    "username": "ACCU Platform Monitor"
+  },
+  "teams": {
+    "webhook_url": "${TEAMS_WEBHOOK_URL}"
+  },
+  "email": {
+    "smtp_server": "${EMAIL_SMTP_SERVER}",
+    "smtp_port": "587",
+    "username": "${EMAIL_USERNAME}",
+    "password": "${EMAIL_PASSWORD}",
+    "from_address": "alerts@accu-platform.com",
+    "to_addresses": [
+      "devops@accu-platform.com",
+      "security@accu-platform.com",
+      "management@accu-platform.com"
+    ]
+  },
+  "pagerduty": {
+    "integration_key": "${PAGERDUTY_INTEGRATION_KEY}",
+    "service_key": "${PAGERDUTY_SERVICE_KEY}"
+  },
+  "webhook_settings": {
+    "retry_attempts": 3,
+    "timeout_seconds": 10,
+    "rate_limit_per_minute": 60
+  },
+  "alert_routing": {
+    "critical": {
+      "channels": ["slack", "discord", "email", "pagerduty"],
+      "recipients": ["devops@accu-platform.com", "management@accu-platform.com"]
+    },
+    "warning": {
+      "channels": ["slack", "discord", "email"],
+      "recipients": ["devops@accu-platform.com"]
+    },
+    "info": {
+      "channels": ["slack", "discord"],
+      "recipients": ["devops@accu-platform.com"]
+    }
+  },
+  "notification_templates": {
+    "deployment_success": {
+      "title": "✅ Deployment Successful",
+      "message": "ACCU Platform deployment completed successfully!\n\nEnvironment: {{environment}}\nVersion: {{version}}\nDuration: {{duration}}\nDeployed by: {{deployer}}"
+    },
+    "deployment_failure": {
+      "title": "❌ Deployment Failed",
+      "message": "ACCU Platform deployment failed!\n\nEnvironment: {{environment}}\nVersion: {{version}}\nError: {{error}}\nDeployed by: {{deployer}}"
+    },
+    "system_down": {
+      "title": "🚨 System Down",
+      "message": "ACCU Platform is experiencing outages!\n\nAffected Services: {{services}}\nStart Time: {{start_time}}\nStatus: {{status}}"
+    },
+    "high_error_rate": {
+      "title": "⚠️ High Error Rate",
+      "message": "High error rate detected in ACCU Platform!\n\nService: {{service}}\nError Rate: {{error_rate}}%\nThreshold: {{threshold}}%"
+    },
+    "security_alert": {
+      "title": "🔒 Security Alert",
+      "message": "Security alert detected in ACCU Platform!\n\nAlert Type: {{alert_type}}\nSeverity: {{severity}}\nSource: {{source}}\nDescription: {{description}}"
+    },
+    "backup_completed": {
+      "title": "💾 Backup Completed",
+      "message": "ACCU Platform backup completed successfully!\n\nBackup Type: {{backup_type}}\nSize: {{size}}\nLocation: {{location}}\nRetention: {{retention}}"
+    }
+  }
+}

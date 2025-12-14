@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: accu-platform
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  DATABASE_HOST: "postgres-service"
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: "accu_platform"
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  API_VERSION: "v1"
+  CORS_ORIGIN: "https://accu-platform.com"
+  RATE_LIMIT_TTL: "60"
+  RATE_LIMIT_LIMIT: "100"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: accu-platform
+data:
+  NODE_ENV: "production"
+  NEXT_PUBLIC_API_URL: "https://api.accu-platform.com"
+  NEXT_PUBLIC_WS_URL: "wss://api.accu-platform.com"
+  NEXT_PUBLIC_APP_NAME: "ACCU Platform"
+  NEXT_PUBLIC_VERSION: "1.0.0"

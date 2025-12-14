@@ -1,0 +1,25 @@
+{
+  "name": "@accu/shared",
+  "version": "1.0.0",
+  "description": "Shared types, utilities, and constants for ACCU platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src/**/*.ts",
+    "type-check": "tsc --noEmit",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.5",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "zod": "^3.21.4",
+    "date-fns": "^2.30.0"
+  }
+}

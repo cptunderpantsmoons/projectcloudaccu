@@ -6,6 +6,7 @@ import { Project } from '../../entities/project.entity';
 import { CalendarController } from './calendar.controller';
 import { CalendarService } from './calendar.service';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
       Project,
     ]),
     NotificationsModule,
+    AuthModule,
   ],
   controllers: [CalendarController],
   providers: [CalendarService],

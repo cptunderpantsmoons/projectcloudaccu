@@ -7,7 +7,6 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import * as mammoth from 'mammoth';
-const pdfParse = require('pdf-parse');
 
 export interface SecurityScanResult {
   isSafe: boolean;
@@ -38,6 +37,7 @@ export interface FileValidationResult {
 
 @Injectable()
 export class DocumentSecurityService {
+  private pdfParse: ((buffer: Buffer) => Promise<any>) | null = null;
   private readonly dangerousExtensions = [
     '.exe', '.bat', '.cmd', '.com', '.pif', '.scr', '.vbs', '.js', '.jar',
     '.ps1', '.sh', '.py', '.php', '.pl', '.rb', '.asp', '.aspx', '.jsp',
@@ -440,7 +440,12 @@ export class DocumentSecurityService {
    */
   private async validatePdf(buffer: Buffer, result: FileValidationResult): Promise<void> {
     try {
-      const data = await pdfParse(buffer);
+      const data = await this.parsePdf(buffer);
+      if (!data) {
+        result.isValid = false;
+        result.errors.push('PDF parsing unavailable');
+        return;
+      }
       
       // Check for password protection
       if (data.info && (data.info.Encrypted || data.info['Encrypted'])) {
@@ -459,6 +464,21 @@ export class DocumentSecurityService {
     } catch (error) {
       result.isValid = false;
       result.errors.push('Invalid PDF format');
+    }
+  }
+
+  /**
+   * Lazy-load pdf-parse to avoid native crashes when not available.
+   */
+  private async parsePdf(buffer: Buffer): Promise<any | null> {
+    try {
+      if (!this.pdfParse) {
+        const mod = await import('pdf-parse');
+        this.pdfParse = mod.default || (mod as any);
+      }
+      return this.pdfParse ? this.pdfParse(buffer) : null;
+    } catch (error) {
+      return null;
     }
   }
 

@@ -220,17 +220,26 @@ class ApiClient {
   }
 
   // Batch requests
-  async batch<T = any>(requests: Array<() => Promise<ApiResponse<T>>>): Promise<T[]> {
-    const results = await Promise.allSettled(requests.map(req => req()));
-    
-    return results.map((result, index) => {
+  /**
+   * Execute multiple API calls in parallel and return their `data` payloads.
+   * If **any** request fails the whole batch rejects – matching typical
+   * transactional UX and preserving a clean `T[]` return type.
+   */
+  async batch<T = unknown>(requests: Array<() => Promise<ApiResponse<T>>>): Promise<T[]> {
+    const settled = await Promise.allSettled(requests.map((r) => r()));
+
+    // Collect data or raise first error
+    const data: T[] = [];
+    for (let i = 0; i < settled.length; i++) {
+      const result = settled[i];
       if (result.status === 'fulfilled') {
-        return result.value.data;
+        data.push(result.value.data as T);
       } else {
-        console.error(`Batch request ${index} failed:`, result.reason);
+        console.error(`Batch request ${i} failed:`, result.reason);
         throw result.reason;
       }
-    });
+    }
+    return data;
   }
 
   // Set auth tokens manually (useful for testing or manual login)

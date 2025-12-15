@@ -25,9 +25,9 @@ describe('AccuApplicationsService - submission deadline event', () => {
     ) as any;
 
     // Stub private methods that touch DB/other repos
-    jest.spyOn(service as any, 'validateSubmissionRequirements').mockResolvedValue(undefined);
-    jest.spyOn(service as any, 'createStatusHistory').mockResolvedValue(undefined);
-    jest.spyOn(service as any, 'formatApplicationResponse').mockImplementation((a: any) => a);
+    jest.spyOn(service, 'validateSubmissionRequirements').mockResolvedValue(undefined);
+    jest.spyOn(service, 'createStatusHistory').mockResolvedValue(undefined);
+    jest.spyOn(service, 'formatApplicationResponse').mockImplementation((a: any) => a);
 
     const application: Partial<AccuApplication> = {
       id: 'app-1',

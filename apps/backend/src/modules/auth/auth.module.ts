@@ -9,6 +9,8 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
 
 import { User } from '../../entities/user.entity';
 import { Role } from '../../entities/role.entity';
@@ -34,11 +36,15 @@ import { Role } from '../../entities/role.entity';
     LocalStrategy,
     JwtStrategy,
     JwtRefreshStrategy,
+    RolesGuard,
+    PermissionsGuard,
   ],
   exports: [
     AuthService,
     JwtModule,
     PassportModule,
+    RolesGuard,
+    PermissionsGuard,
   ],
 })
 export class AuthModule {}

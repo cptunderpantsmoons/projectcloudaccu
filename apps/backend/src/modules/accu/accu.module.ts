@@ -9,6 +9,7 @@ import { Notification } from '../../entities/notification.entity';
 import { AccuApplicationsService } from './accu-applications.service';
 import { AccuApplicationsController } from './accu-applications.controller';
 import { AccuNotificationService } from './accu-notification.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AccuNotificationService } from './accu-notification.service';
       User,
       Notification,
     ]),
+    AuthModule,
   ],
   providers: [AccuApplicationsService, AccuNotificationService],
   controllers: [AccuApplicationsController],

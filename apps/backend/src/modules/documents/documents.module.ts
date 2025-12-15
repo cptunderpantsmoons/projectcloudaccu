@@ -8,11 +8,13 @@ import { Document } from '../../entities/document.entity';
 import { User } from '../../entities/user.entity';
 import { Project } from '../../entities/project.entity';
 import { FileStorageModule } from '../file-storage/file-storage.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Document, User, Project]),
     FileStorageModule,
+    AuthModule,
     MulterModule.register({
       limits: {
         fileSize: 50 * 1024 * 1024, // 50MB

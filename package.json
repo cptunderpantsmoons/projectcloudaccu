@@ -65,5 +65,9 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.7.2",
+    "xmlbuilder": "^15.1.1"
   }
 }

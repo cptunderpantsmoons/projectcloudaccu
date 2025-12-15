@@ -1,0 +1,46 @@
+{
+  "swarm": {
+    "name": "rest-api-authentication-swarm",
+    "objective": "Build a REST API with authentication system",
+    "topology": "star",
+    "mode": "centralized",
+    "maxAgents": 5,
+    "created": "2025-12-15T00:00:00Z",
+    "status": "initializing"
+  },
+  "coordinator": {
+    "agentId": "coordinator-001",
+    "role": "central-coordinator",
+    "responsibilities": [
+      "Task distribution",
+      "Progress monitoring",
+      "Resource allocation",
+      "Conflict resolution",
+      "Memory coordination"
+    ]
+  },
+  "memoryNamespaces": {
+    "primary": "coordination",
+    "shared": {
+      "objectives": "swarm/objectives",
+      "tasks": "swarm/tasks",
+      "agents": "swarm/agents",
+      "artifacts": "swarm/shared",
+      "status": "swarm/status"
+    }
+  },
+  "communicationProtocol": {
+    "type": "event-driven",
+    "channels": [
+      "task-assignment",
+      "status-update",
+      "artifact-sharing",
+      "completion-signal"
+    ]
+  },
+  "resourceAllocation": {
+    "computeUnits": "standard",
+    "memoryLimit": "2GB",
+    "timeoutMinutes": 30
+  }
+}

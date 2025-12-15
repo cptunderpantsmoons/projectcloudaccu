@@ -1,4 +1,5 @@
 // Workflow Types for Frontend
+import type React from 'react';
 
 export interface WorkflowState {
   workflowId: string;
@@ -167,7 +168,7 @@ export interface WorkflowMetrics {
 export interface WorkflowAction {
   name: string;
   label: string;
-  icon?: string;
+  icon?: React.ElementType<{ className?: string }>;
   color?: 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
   requiresConfirmation?: boolean;
   confirmationMessage?: string;

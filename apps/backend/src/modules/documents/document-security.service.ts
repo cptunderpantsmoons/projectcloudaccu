@@ -7,7 +7,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import * as mammoth from 'mammoth';
-import * as pdfParse from 'pdf-parse';
+const pdfParse = require('pdf-parse');
 
 export interface SecurityScanResult {
   isSafe: boolean;

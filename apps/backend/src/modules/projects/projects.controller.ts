@@ -240,7 +240,7 @@ export class ProjectsController {
       canComplete: project.status === ProjectStatus.ACTIVE || project.status === ProjectStatus.ON_HOLD,
       canCancel: project.status !== ProjectStatus.COMPLETED && project.status !== ProjectStatus.CANCELLED,
       allowedTransitions,
-      progress: project.isCompleted() ? 100 : project.isDraft() ? 0 : 25,
+      progress: project.status === ProjectStatus.COMPLETED ? 100 : project.status === ProjectStatus.DRAFT ? 0 : 25,
       isOverdue,
       daysUntilDeadline,
     };

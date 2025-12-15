@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
-import { Notification, NotificationType, NotificationChannel } from '../../../entities/notification.entity';
+import { Notification, NotificationType, NotificationChannel } from '../../entities/notification.entity';
 
 export interface CreateNotificationDto {
   type: NotificationType;

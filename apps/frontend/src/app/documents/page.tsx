@@ -98,16 +98,15 @@ export default function DocumentsPage() {
 
   const handleFileUpload = async (files: FileList) => {
     for (const file of Array.from(files)) {
+      const uploadId = Math.random().toString(36).substring(7);
       try {
-        const fileId = Math.random().toString(36).substring(7);
-        
-        setUploadProgress(prev => ({ ...prev, [fileId]: 0 }));
+        setUploadProgress(prev => ({ ...prev, [uploadId]: 0 }));
 
         const response = await apiClient.uploadFile<Document>(
           '/documents/upload',
           file,
           (progress) => {
-            setUploadProgress(prev => ({ ...prev, [fileId]: progress }));
+            setUploadProgress(prev => ({ ...prev, [uploadId]: progress }));
           }
         );
 
@@ -120,7 +119,7 @@ export default function DocumentsPage() {
       } finally {
         setUploadProgress(prev => {
           const newProgress = { ...prev };
-          delete newProgress[fileId];
+          delete newProgress[uploadId];
           return newProgress;
         });
       }

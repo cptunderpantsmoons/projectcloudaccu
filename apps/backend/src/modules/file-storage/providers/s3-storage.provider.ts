@@ -49,6 +49,8 @@ export class S3StorageProvider implements IStorageProvider {
 
       return {
         filename,
+        originalName: file.originalname,
+        mimeType: file.mimetype,
         path: key, // In S3, path is the key
         url: await this.getUrl(key),
         size: file.size,

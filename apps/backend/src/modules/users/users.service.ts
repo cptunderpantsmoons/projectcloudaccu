@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { Repository, SelectQueryBuilder, In } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, UserStatus } from '../../entities/user.entity';
 import { Role } from '../../entities/role.entity';
@@ -51,7 +51,7 @@ export class UsersService {
     let roles: Role[] = [];
     if (createUserDto.roles && createUserDto.roles.length > 0) {
       roles = await this.roleRepository.findBy({
-        name: createUserDto.roles,
+        name: In(createUserDto.roles),
       });
     } else {
       const userRole = await this.roleRepository.findOne({
@@ -204,7 +204,7 @@ export class UsersService {
     // Handle role updates
     if (updateUserDto.roles) {
       const roles = await this.roleRepository.findBy({
-        name: updateUserDto.roles,
+        name: In(updateUserDto.roles),
       });
       user.roles = roles;
     }

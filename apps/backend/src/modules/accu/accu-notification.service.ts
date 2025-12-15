@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Notification } from '../../entities/notification.entity';
+import { Notification, NotificationType } from '../../entities/notification.entity';
 import { AccuApplication, ACCUStatus } from '../../entities/accu-application.entity';
 import { User } from '../../entities/user.entity';
 
 export interface NotificationData {
-  type: 'info' | 'warning' | 'error' | 'success' | 'reminder';
+  type: NotificationType;
   title: string;
   message: string;
   userId?: string;
@@ -68,7 +68,7 @@ export class AccuNotificationService {
     const reminderDays = [30, 14, 7, 3, 1];
     if (!reminderDays.includes(daysUntilDeadline)) return;
 
-    const urgencyLevel = daysUntilDeadline <= 7 ? 'error' : daysUntilDeadline <= 14 ? 'warning' : 'info';
+    const urgencyLevel = daysUntilDeadline <= 7 ? NotificationType.ERROR : daysUntilDeadline <= 14 ? NotificationType.WARNING : NotificationType.INFO;
     
     await this.createNotification({
       type: urgencyLevel,
@@ -95,7 +95,7 @@ export class AccuNotificationService {
     requiredDocumentsCount: number,
   ): Promise<void> {
     await this.createNotification({
-      type: 'warning',
+      type: NotificationType.WARNING,
       title: 'Missing Required Documents',
       message: `Your ACCU application is missing ${missingDocuments.length} required document(s) out of ${requiredDocumentsCount}. Please upload the missing documents to proceed with the review.`,
       userId: application.project?.ownerId,
@@ -115,7 +115,7 @@ export class AccuNotificationService {
    */
   async confirmSubmission(application: AccuApplication, submissionNotes?: string): Promise<void> {
     await this.createNotification({
-      type: 'success',
+      type: NotificationType.SUCCESS,
       title: 'ACCU Application Submitted',
       message: `Your ACCU application "${application.project?.name || 'Unknown Project'}" has been successfully submitted for review.`,
       userId: application.project?.ownerId,
@@ -144,7 +144,7 @@ export class AccuNotificationService {
       : `Your ACCU application has been approved for ${application.accuUnits} units.`;
 
     await this.createNotification({
-      type: 'success',
+      type: NotificationType.SUCCESS,
       title: 'ACCU Application Approved',
       message,
       userId: application.project?.ownerId,
@@ -161,7 +161,7 @@ export class AccuNotificationService {
 
     // Notify about next steps
     await this.createNotification({
-      type: 'info',
+      type: NotificationType.INFO,
       title: 'Next Steps for ACCU Application',
       message: 'Your application has been approved. The next step is to await the issuance of ACCU units.',
       userId: application.project?.ownerId,
@@ -184,7 +184,7 @@ export class AccuNotificationService {
     reviewerComments?: string,
   ): Promise<void> {
     await this.createNotification({
-      type: 'error',
+      type: NotificationType.ERROR,
       title: 'ACCU Application Rejected',
       message: `Your ACCU application has been rejected. ${reason ? `Reason: ${reason}` : ''}`,
       userId: application.project?.ownerId,
@@ -200,7 +200,7 @@ export class AccuNotificationService {
 
     // Provide guidance for resubmission
     await this.createNotification({
-      type: 'info',
+      type: NotificationType.INFO,
       title: 'Resubmission Guidance',
       message: 'You may resubmit a revised ACCU application after addressing the rejection reasons. Please review the feedback and contact support if needed.',
       userId: application.project?.ownerId,
@@ -219,7 +219,7 @@ export class AccuNotificationService {
    */
   async notifyIssuance(application: AccuApplication): Promise<void> {
     await this.createNotification({
-      type: 'success',
+      type: NotificationType.SUCCESS,
       title: 'ACCU Units Issued',
       message: `Congratulations! ${application.accuUnits} ACCU units have been issued for your application "${application.project?.name || 'Unknown Project'}".`,
       userId: application.project?.ownerId,
@@ -235,7 +235,7 @@ export class AccuNotificationService {
 
     // Send certificate information
     await this.createNotification({
-      type: 'info',
+      type: NotificationType.INFO,
       title: 'ACCU Certificate Information',
       message: 'Your ACCU units have been issued. Certificate details will be available in your account within 24-48 hours.',
       userId: application.project?.ownerId,
@@ -286,32 +286,32 @@ export class AccuNotificationService {
       [ACCUStatus.DRAFT]: {
         title: 'ACCU Application Created',
         message: 'A new ACCU application has been created and is in draft status.',
-        type: 'info' as const,
+        type: NotificationType.INFO,
       },
       [ACCUStatus.SUBMITTED]: {
         title: 'ACCU Application Submitted',
         message: 'Your ACCU application has been submitted for review.',
-        type: 'success' as const,
+        type: NotificationType.SUCCESS,
       },
       [ACCUStatus.UNDER_REVIEW]: {
         title: 'ACCU Application Under Review',
         message: 'Your ACCU application is now under review by our team.',
-        type: 'info' as const,
+        type: NotificationType.INFO,
       },
       [ACCUStatus.APPROVED]: {
         title: 'ACCU Application Approved',
         message: 'Your ACCU application has been approved!',
-        type: 'success' as const,
+        type: NotificationType.SUCCESS,
       },
       [ACCUStatus.REJECTED]: {
         title: 'ACCU Application Rejected',
         message: 'Your ACCU application has been rejected.',
-        type: 'error' as const,
+        type: NotificationType.ERROR,
       },
       [ACCUStatus.ISSUED]: {
         title: 'ACCU Units Issued',
         message: 'Your ACCU units have been issued successfully.',
-        type: 'success' as const,
+        type: NotificationType.SUCCESS,
       },
     };
 
@@ -347,7 +347,7 @@ export class AccuNotificationService {
     // This would require a way to get admin users
     // For now, we'll create a system notification
     await this.createNotification({
-      type: 'info',
+      type: NotificationType.INFO,
       title: 'ACCU Application Status Update',
       message: `ACCU Application ${application.id} status changed to ${newStatus}`,
       tenantId: application.tenantId,

@@ -1,7 +1,6 @@
 {
   "extends": [
-    "next/core-web-vitals",
-    "@accu/eslint-config"
+    "next/core-web-vitals"
   ],
   "rules": {
     "@next/next/no-img-element": "off",

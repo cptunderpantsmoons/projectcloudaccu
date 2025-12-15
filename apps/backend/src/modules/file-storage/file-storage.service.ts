@@ -141,6 +141,19 @@ export class FileStorageService {
   }
 
   /**
+   * Get file buffer
+   */
+  async getFileBuffer(id: string): Promise<Buffer> {
+    const stream = await this.getFileStream(id);
+    const chunks: Buffer[] = [];
+    return new Promise((resolve, reject) => {
+      stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+      stream.on('error', (err) => reject(err));
+      stream.on('end', () => resolve(Buffer.concat(chunks)));
+    });
+  }
+
+  /**
    * Delete file
    */
   async deleteFile(id: string): Promise<void> {

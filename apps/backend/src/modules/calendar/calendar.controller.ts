@@ -20,10 +20,11 @@ import {
   ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 import { CalendarService } from './calendar.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
+import { Permission } from '../../entities/role.entity';
 import {
   CalendarEventCreateDto,
   CalendarEventUpdateDto,
@@ -31,11 +32,11 @@ import {
   ReminderDto,
   CalendarViewDto,
 } from './dto/calendar-event.dto';
-import { CalendarEvent } from '../../../entities/calendar-event.entity';
+import { CalendarEvent, Priority } from '../../entities/calendar-event.entity';
 
 @ApiTags('Calendar')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(AuthGuard('jwt'), PermissionsGuard)
 @Controller('calendar')
 export class CalendarController {
   private readonly logger = new Logger(CalendarController.name);
@@ -44,7 +45,7 @@ export class CalendarController {
 
   // Event CRUD Operations
   @Post('events')
-  @Permissions('calendar.events.write')
+  @Permissions(Permission.CALENDAR_WRITE)
   @ApiOperation({ summary: 'Create a new calendar event' })
   @ApiBody({ type: CalendarEventCreateDto })
   @ApiResponse({
@@ -65,7 +66,7 @@ export class CalendarController {
   }
 
   @Get('events')
-  @Permissions('calendar.events.read')
+  @Permissions(Permission.CALENDAR_READ)
   @ApiOperation({ summary: 'Get calendar events with filtering and pagination' })
   @ApiQuery({ type: CalendarEventQueryDto })
   @ApiResponse({
@@ -78,7 +79,7 @@ export class CalendarController {
   }
 
   @Get('events/dashboard')
-  @Permissions('calendar.events.read')
+  @Permissions(Permission.CALENDAR_READ)
   @ApiOperation({ summary: 'Get calendar dashboard data' })
   @ApiQuery({ name: 'tenantId', required: false, type: String })
   @ApiResponse({
@@ -118,7 +119,7 @@ export class CalendarController {
   }
 
   @Get('events/upcoming')
-  @Permissions('calendar.events.read')
+  @Permissions(Permission.CALENDAR_READ)
   @ApiOperation({ summary: 'Get upcoming events' })
   @ApiQuery({ name: 'days', required: false, type: Number, description: 'Number of days to look ahead (default: 30)' })
   @ApiQuery({ name: 'tenantId', required: false, type: String })
@@ -151,7 +152,7 @@ export class CalendarController {
   }
 
   @Get('events/overdue')
-  @Permissions('calendar.events.read')
+  @Permissions(Permission.CALENDAR_READ)
   @ApiOperation({ summary: 'Get overdue deadlines' })
   @ApiQuery({ name: 'tenantId', required: false, type: String })
   @ApiResponse({
@@ -173,7 +174,7 @@ export class CalendarController {
   }
 
   @Get('events/:id')
-  @Permissions('calendar.events.read')
+  @Permissions(Permission.CALENDAR_READ)
   @ApiOperation({ summary: 'Get calendar event by ID' })
   @ApiParam({ name: 'id', type: String, description: 'Event ID' })
   @ApiResponse({
@@ -191,7 +192,7 @@ export class CalendarController {
   }
 
   @Put('events/:id')
-  @Permissions('calendar.events.write')
+  @Permissions(Permission.CALENDAR_WRITE)
   @ApiOperation({ summary: 'Update calendar event' })
   @ApiParam({ name: 'id', type: String, description: 'Event ID' })
   @ApiBody({ type: CalendarEventUpdateDto })
@@ -214,7 +215,7 @@ export class CalendarController {
   }
 
   @Delete('events/:id')
-  @Permissions('calendar.events.delete')
+  @Permissions(Permission.CALENDAR_DELETE)
   @ApiOperation({ summary: 'Delete calendar event' })
   @ApiParam({ name: 'id', type: String, description: 'Event ID' })
   @ApiResponse({
@@ -232,7 +233,7 @@ export class CalendarController {
 
   // Reminder Management
   @Post('events/:id/reminders')
-  @Permissions('calendar.events.write')
+  @Permissions(Permission.CALENDAR_WRITE)
   @ApiOperation({ summary: 'Set custom reminders for an event' })
   @ApiParam({ name: 'id', type: String, description: 'Event ID' })
   @ApiBody({ type: ReminderDto })
@@ -269,7 +270,7 @@ export class CalendarController {
 
   // Deadline Management
   @Get('deadlines')
-  @Permissions('calendar.events.read')
+  @Permissions(Permission.CALENDAR_READ)
   @ApiOperation({ summary: 'Get all deadlines' })
   @ApiQuery({ type: CalendarEventQueryDto })
   @ApiResponse({
@@ -282,7 +283,7 @@ export class CalendarController {
   }
 
   @Get('deadlines/:id')
-  @Permissions('calendar.events.read')
+  @Permissions(Permission.CALENDAR_READ)
   @ApiOperation({ summary: 'Get specific deadline details' })
   @ApiParam({ name: 'id', type: String, description: 'Deadline ID' })
   @ApiResponse({
@@ -305,7 +306,7 @@ export class CalendarController {
   }
 
   @Post('deadlines/:id/complete')
-  @Permissions('calendar.events.write')
+  @Permissions(Permission.CALENDAR_WRITE)
   @ApiOperation({ summary: 'Mark deadline as complete' })
   @ApiParam({ name: 'id', type: String, description: 'Deadline ID' })
   @ApiResponse({
@@ -327,7 +328,7 @@ export class CalendarController {
 
   // Calendar Views
   @Get('calendar/:year/:month')
-  @Permissions('calendar.events.read')
+  @Permissions(Permission.CALENDAR_READ)
   @ApiOperation({ summary: 'Get monthly calendar view' })
   @ApiParam({ name: 'year', type: Number, description: 'Year (e.g., 2024)' })
   @ApiParam({ name: 'month', type: Number, description: 'Month (1-12)' })
@@ -370,7 +371,7 @@ export class CalendarController {
   }
 
   @Get('calendar/:year/:month/:day')
-  @Permissions('calendar.events.read')
+  @Permissions(Permission.CALENDAR_READ)
   @ApiOperation({ summary: 'Get daily calendar view' })
   @ApiParam({ name: 'year', type: Number, description: 'Year (e.g., 2024)' })
   @ApiParam({ name: 'month', type: Number, description: 'Month (1-12)' })
@@ -398,7 +399,7 @@ export class CalendarController {
 
   // Analytics and Statistics
   @Get('stats')
-  @Permissions('calendar.events.read')
+  @Permissions(Permission.CALENDAR_READ)
   @ApiOperation({ summary: 'Get calendar statistics and analytics' })
   @ApiQuery({ name: 'tenantId', required: false, type: String })
   @ApiResponse({
@@ -412,7 +413,7 @@ export class CalendarController {
 
   // Conflict Detection
   @Post('conflicts')
-  @Permissions('calendar.events.write')
+  @Permissions(Permission.CALENDAR_WRITE)
   @ApiOperation({ summary: 'Check for event conflicts' })
   @ApiBody({ type: CalendarEventCreateDto })
   @ApiResponse({
@@ -432,7 +433,7 @@ export class CalendarController {
 
   // Integration Endpoints
   @Post('accu/:applicationId/deadlines')
-  @Permissions('calendar.events.write')
+  @Permissions(Permission.CALENDAR_WRITE)
   @ApiOperation({ summary: 'Create ACCU application deadlines' })
   @ApiParam({ name: 'applicationId', type: String, description: 'ACCU Application ID' })
   @ApiBody({
@@ -470,7 +471,7 @@ export class CalendarController {
   }
 
   @Post('projects/:projectId/milestones')
-  @Permissions('calendar.events.write')
+  @Permissions(Permission.CALENDAR_WRITE)
   @ApiOperation({ summary: 'Create project milestone deadlines' })
   @ApiParam({ name: 'projectId', type: String, description: 'Project ID' })
   @ApiBody({
@@ -500,7 +501,7 @@ export class CalendarController {
   })
   async createProjectMilestones(
     @Param('projectId') projectId: string,
-    @Body() body: { milestones: Array<{ name: string; dueDate: Date; priority: string }>; createdById: string },
+    @Body() body: { milestones: Array<{ name: string; dueDate: Date; priority: Priority }>; createdById: string },
   ) {
     this.logger.log(`Creating project milestone deadlines for project: ${projectId}`);
     const events = await this.calendarService.createProjectMilestones(
@@ -517,7 +518,7 @@ export class CalendarController {
   }
 
   @Post('audits/:auditId/events')
-  @Permissions('calendar.events.write')
+  @Permissions(Permission.CALENDAR_WRITE)
   @ApiOperation({ summary: 'Create audit-related events' })
   @ApiParam({ name: 'auditId', type: String, description: 'Audit ID' })
   @ApiBody({

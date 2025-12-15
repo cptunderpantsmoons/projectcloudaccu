@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, In, LessThanOrEqual, MoreThanOrEqual, Not, LessThan } from 'typeorm';
-import { CalendarEvent, EventType, Priority } from '../../../entities/calendar-event.entity';
-import { User } from '../../../entities/user.entity';
-import { Project } from '../../../entities/project.entity';
+import { CalendarEvent, EventType, Priority } from '../../entities/calendar-event.entity';
+import { NotificationType, NotificationChannel } from '../../entities/notification.entity';
+import { User } from '../../entities/user.entity';
+import { Project } from '../../entities/project.entity';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CalendarEventCreateDto, CalendarEventUpdateDto, CalendarEventQueryDto, DeadlineDto, ReminderDto } from './dto/calendar-event.dto';
 
@@ -327,8 +328,8 @@ export class CalendarService {
         if (reminderDate > new Date()) {
           // Schedule reminder notification
           await this.notificationsService.createNotification({
-            type: 'reminder',
-            channel: 'in_app',
+            type: NotificationType.REMINDER,
+            channel: NotificationChannel.IN_APP,
             title: `Reminder: ${event.title}`,
             message: `Event "${event.title}" is scheduled for ${event.startDate.toLocaleDateString()}`,
             userId: event.assigneeId || event.createdById,
@@ -438,8 +439,8 @@ export class CalendarService {
 
       // Send completion notification
       await this.notificationsService.createNotification({
-        type: 'success',
-        channel: 'in_app',
+        type: NotificationType.SUCCESS,
+        channel: NotificationChannel.IN_APP,
         title: 'Deadline Completed',
         message: `Deadline "${deadline.title}" has been marked as completed`,
         userId: deadline.assigneeId || deadline.createdById,
@@ -461,8 +462,8 @@ export class CalendarService {
       // Set up automated tracking for critical deadlines
       if (deadline.priority === Priority.CRITICAL || deadline.priority === Priority.HIGH) {
         await this.notificationsService.createNotification({
-          type: 'warning',
-          channel: 'in_app',
+          type: NotificationType.WARNING,
+          channel: NotificationChannel.IN_APP,
           title: 'New High Priority Deadline',
           message: `New ${deadline.priority.toLowerCase()} deadline: "${deadline.title}"`,
           userId: deadline.assigneeId || deadline.createdById,

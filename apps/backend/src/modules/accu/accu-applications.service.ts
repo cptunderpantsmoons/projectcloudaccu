@@ -12,7 +12,7 @@ import { AccuApplication, ACCUStatus } from '../../entities/accu-application.ent
 import { Project } from '../../entities/project.entity';
 import { Document } from '../../entities/document.entity';
 import { User } from '../../entities/user.entity';
-import { CalendarEvent } from '../../entities/calendar-event.entity';
+import { CalendarEvent, EventType, Priority } from '../../entities/calendar-event.entity';
 import { AccuNotificationService } from './accu-notification.service';
 import {
   ACCUApplicationCreateDto,
@@ -414,7 +414,13 @@ export class AccuApplicationsService {
 
     // Create calendar event for deadline if provided
     if (submissionDto.deadline) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/d603985f-7b9e-40a6-b347-72ee286e95ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'A',location:'apps/backend/src/modules/accu/accu-applications.service.ts:415',message:'submit(): deadline provided, calling createSubmissionDeadlineEvent()',data:{applicationId:application.id,projectId:application.projectId,projectOwnerId:application.project?.ownerId,deadlineType:typeof (submissionDto as any).deadline,deadlineValue:(submissionDto as any).deadline instanceof Date ? (submissionDto as any).deadline.toISOString() : String((submissionDto as any).deadline)},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion agent log
       await this.createSubmissionDeadlineEvent(application, submissionDto.deadline);
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/d603985f-7b9e-40a6-b347-72ee286e95ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'A',location:'apps/backend/src/modules/accu/accu-applications.service.ts:417',message:'submit(): returned from createSubmissionDeadlineEvent()',data:{applicationId:application.id},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion agent log
     }
 
     // Send submission confirmation notification
@@ -954,11 +960,47 @@ export class AccuApplicationsService {
   }
 
   private async createSubmissionDeadlineEvent(application: AccuApplication, deadline: Date): Promise<void> {
-    // System-generated event - would ideally use a service account user ID
-    // For now, we'll need to pass userId from the controller or use the first admin user
-    // Skipping event creation until proper user context is available
-    // TODO: Pass userId through the service method chain or create a system user
-    return;
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/d603985f-7b9e-40a6-b347-72ee286e95ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'post-fix',hypothesisId:'B',location:'apps/backend/src/modules/accu/accu-applications.service.ts:956',message:'createSubmissionDeadlineEvent(): entered',data:{applicationId:application.id,projectId:application.projectId,projectOwnerId:application.project?.ownerId,deadline:deadline instanceof Date ? deadline.toISOString() : String(deadline)},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion agent log
+
+    const createdById = application.project?.ownerId;
+    if (!createdById) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/d603985f-7b9e-40a6-b347-72ee286e95ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'post-fix',hypothesisId:'B',location:'apps/backend/src/modules/accu/accu-applications.service.ts:962',message:'createSubmissionDeadlineEvent(): missing project.ownerId, skipping event creation',data:{applicationId:application.id,projectId:application.projectId},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion agent log
+      return;
+    }
+
+    const deadlineDate = deadline instanceof Date ? deadline : new Date(deadline as any);
+
+    const event = this.calendarEventRepository.create({
+      title: `ACCU Application Review Deadline - ${application.project?.name || 'Project'}`,
+      description: `Review deadline for ACCU application ${application.id}`,
+      type: EventType.DEADLINE,
+      priority: Priority.HIGH,
+      startDate: deadlineDate,
+      endDate: deadlineDate,
+      isAllDay: true,
+      projectId: application.projectId,
+      createdById,
+      assigneeId: createdById,
+      metadata: {
+        accuApplicationId: application.id,
+        kind: 'accu_submission_deadline',
+      },
+      reminders: [7, 3, 1],
+    });
+
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/d603985f-7b9e-40a6-b347-72ee286e95ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'post-fix',hypothesisId:'B',location:'apps/backend/src/modules/accu/accu-applications.service.ts:987',message:'createSubmissionDeadlineEvent(): saving CalendarEvent',data:{applicationId:application.id,projectId:application.projectId,createdById,deadline:deadlineDate.toISOString(),title:event.title},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion agent log
+
+    const saved = await this.calendarEventRepository.save(event);
+
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/d603985f-7b9e-40a6-b347-72ee286e95ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'post-fix',hypothesisId:'B',location:'apps/backend/src/modules/accu/accu-applications.service.ts:991',message:'createSubmissionDeadlineEvent(): saved CalendarEvent',data:{applicationId:application.id,calendarEventId:(saved as any)?.id,projectId:application.projectId},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion agent log
   }
 
   private async getNextDeadline(projectId: string): Promise<Date | null> {

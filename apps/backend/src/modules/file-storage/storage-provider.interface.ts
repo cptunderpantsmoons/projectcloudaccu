@@ -2,6 +2,8 @@ import { Readable } from 'stream';
 
 export interface FileUploadResult {
   filename: string;
+  originalName: string;
+  mimeType: string;
   path: string;
   url: string;
   size: number;

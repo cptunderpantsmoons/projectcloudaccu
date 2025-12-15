@@ -28,6 +28,7 @@ import { AccuApplicationsService } from './accu-applications.service';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Permission } from '../../entities/role.entity';
+import { ACCUStatus } from '../../entities/accu-application.entity';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
 import {
@@ -46,7 +47,6 @@ import {
   ACCUApplicationDashboardDto,
   ACCUApplicationStatsDto,
 } from './dto';
-import { ACCUStatus } from '../../entities/accu-application.entity';
 
 @ApiTags('accu-applications')
 @Controller('accu/applications')
@@ -497,7 +497,7 @@ export class AccuApplicationsController {
       canEdit,
       canDelete,
       allowedTransitions,
-      progress: application.isIssued() ? 100 : application.isApproved() ? 90 : application.isSubmitted() ? 50 : 10,
+      progress: application.status === ACCUStatus.ISSUED ? 100 : application.status === ACCUStatus.APPROVED ? 90 : application.status === ACCUStatus.SUBMITTED ? 50 : 10,
       isOverdue: false, // Would be calculated based on deadlines
       daysInCurrentStatus,
     };

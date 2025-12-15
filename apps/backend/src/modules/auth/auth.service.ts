@@ -8,7 +8,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { User, UserStatus } from '../../entities/user.entity';
@@ -113,7 +113,7 @@ export class AuthService {
     let roles: Role[] = [];
     if (registerDto.roles && registerDto.roles.length > 0) {
       roles = await this.roleRepository.findBy({
-        name: registerDto.roles,
+        name: In(registerDto.roles),
       });
     } else {
       const userRole = await this.roleRepository.findOne({

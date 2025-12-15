@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { IStorageProvider, FileUploadResult } from './storage-provider.interface';
+import { IStorageProvider, FileUploadResult } from '../storage-provider.interface';
 import * as fs from 'fs/promises';
 import * as fsSync from 'fs';
 import * as path from 'path';
@@ -34,6 +34,8 @@ export class LocalStorageProvider implements IStorageProvider {
 
     return {
       filename,
+      originalName: file.originalname,
+      mimeType: file.mimetype,
       path: fullPath,
       url: `${this.baseUrl}/${uploadPath}/${filename}`,
       size: file.size,

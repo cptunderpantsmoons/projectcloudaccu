@@ -2,7 +2,7 @@ import { Controller, Post, Body, UseGuards, BadRequestException } from '@nestjs/
 import { EmailService } from './email.service';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
-import { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 class SendTestEmailDto {
@@ -19,7 +19,7 @@ class SendTestEmailDto {
 }
 
 @Controller('integrations/email')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class EmailController {
   constructor(private readonly emailService: EmailService) {}
 

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
+import { join } from 'path';
 
 import { User } from '../entities/user.entity';
 import { Role } from '../entities/role.entity';
@@ -21,13 +22,10 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
   constructor(private configService: ConfigService) {}
 
   createTypeOrmOptions(): TypeOrmModuleOptions {
-    return {
+    const sslEnabled = this.configService.get<boolean>('database.ssl');
+
+    const baseConfig: Partial<TypeOrmModuleOptions> = {
       type: 'postgres',
-      host: this.configService.get<string>('database.host'),
-      port: this.configService.get<number>('database.port'),
-      username: this.configService.get<string>('database.username'),
-      password: this.configService.get<string>('database.password'),
-      database: this.configService.get<string>('database.database'),
       entities: [
         User,
         Role,
@@ -43,12 +41,31 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
         FileUpload,
         AuditLog,
       ],
+      migrations: [join(__dirname, '../database/migrations/*.{ts,js}')],
+      migrationsRun: this.configService.get<boolean>('database.runMigrations'),
       synchronize: this.configService.get<boolean>('database.synchronize'),
       logging: this.configService.get<boolean>('database.logging'),
-      ssl: this.configService.get<string>('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
+      ssl: sslEnabled ? { rejectUnauthorized: false } : false,
       extra: {
         connectionLimit: 10,
       },
     };
+
+    const url = this.configService.get<string>('database.url');
+    if (url) {
+      return {
+        ...baseConfig,
+        url,
+      } as TypeOrmModuleOptions;
+    }
+
+    return {
+      ...baseConfig,
+      host: this.configService.get<string>('database.host'),
+      port: this.configService.get<number>('database.port'),
+      username: this.configService.get<string>('database.username'),
+      password: this.configService.get<string>('database.password'),
+      database: this.configService.get<string>('database.database'),
+    } as TypeOrmModuleOptions;
   }
 }

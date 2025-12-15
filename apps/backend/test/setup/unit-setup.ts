@@ -40,7 +40,7 @@ jest.mock('ioredis', () => {
 });
 
 // Mock Temporal client for unit tests
-jest.mock('temporalio/client', () => ({
+jest.mock('@temporalio/client', () => ({
   Connection: {
     connect: jest.fn().mockResolvedValue({
       workflowService: {

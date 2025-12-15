@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
   Inject,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FileUpload } from '../../entities/file-upload.entity';
@@ -34,8 +35,9 @@ export class FileStorageService {
     private readonly fileUploadRepository: Repository<FileUpload>,
     @Inject('STORAGE_PROVIDER')
     private readonly storageProvider: IStorageProvider,
+    private readonly configService: ConfigService,
   ) {
-    this.maxFileSize = parseInt(process.env.MAX_FILE_SIZE || '10485760'); // 10MB default
+    this.maxFileSize = this.configService.get<number>('fileStorage.maxFileSize') || 10 * 1024 * 1024;
     this.allowedMimeTypes = [
       'application/pdf',
       'application/msword',
@@ -55,7 +57,7 @@ export class FileStorageService {
       'application/zip',
       'application/x-rar-compressed',
     ];
-    this.storageQuota = parseInt(process.env.STORAGE_QUOTA || '1073741824'); // 1GB default
+    this.storageQuota = this.configService.get<number>('fileStorage.storageQuota') || 1024 * 1024 * 1024;
   }
 
   /**

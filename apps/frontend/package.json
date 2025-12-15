@@ -15,10 +15,9 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@accu/shared": "workspace:*",
+    "@accu/shared": "file:../../packages/shared",
     "@hookform/resolvers": "^3.1.1",
     "@radix-ui/react-avatar": "^1.0.3",
-    "@radix-ui/react-button": "^1.0.3",
     "@radix-ui/react-dialog": "^1.0.4",
     "@radix-ui/react-dropdown-menu": "^2.0.5",
     "@radix-ui/react-form": "^0.0.3",
@@ -28,7 +27,6 @@
     "@radix-ui/react-select": "^1.2.2",
     "@radix-ui/react-separator": "^1.0.3",
     "@radix-ui/react-slot": "^1.0.2",
-    "@radix-ui/react-table": "^1.0.3",
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-toast": "^1.1.4",
     "@tanstack/react-query": "^4.29.25",

@@ -87,7 +87,7 @@ export class Notification {
   updatedAt: Date;
 
   // Helper methods
-  isRead(): boolean {
+  isReadOnly(): boolean {
     return this.isRead;
   }
 

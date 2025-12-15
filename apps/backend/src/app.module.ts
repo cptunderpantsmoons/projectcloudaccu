@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { MulterModule } from '@nestjs/platform-express';
 
-import { configuration } from './config/configuration';
+import configuration from './config/configuration';
 import { DatabaseConfig } from './config/database.config';
 
 import { AuthModule } from './modules/auth/auth.module';
@@ -21,6 +21,8 @@ import { EmailModule } from './modules/email/email.module';
 import { CerModule } from './modules/cer/cer.module';
 import { ExternalModule } from './modules/external/external.module';
 import { SearchModule } from './modules/search/search.module';
+import { HealthModule } from './modules/health/health.module';
+// import { TemporalModule } from './modules/temporal/temporal.module';
 
 @Module({
   imports: [
@@ -43,8 +45,8 @@ import { SearchModule } from './modules/search/search.module';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => [
         {
-          ttl: configService.get('RATE_LIMIT_TTL', 60000),
-          limit: configService.get('RATE_LIMIT_MAX', 100),
+          ttl: configService.get('rateLimit.ttl', 60000),
+          limit: configService.get('rateLimit.max', 100),
         },
       ],
       inject: [ConfigService],
@@ -70,6 +72,7 @@ import { SearchModule } from './modules/search/search.module';
     CerModule,
     ExternalModule,
     SearchModule,
+    HealthModule,
   ],
 })
 export class AppModule {}

@@ -151,7 +151,7 @@ async function checkRedis(): Promise<void> {
 }
 
 async function checkTemporal(): Promise<void> {
-  const { Connection } = require('temporalio/client');
+  const { Connection } = require('@temporalio/client');
   
   try {
     const connection = await Connection.connect({

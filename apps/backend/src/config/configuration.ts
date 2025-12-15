@@ -1,16 +1,32 @@
+import * as path from 'path';
+
+const toNumber = (value: string | undefined, fallback: number) => {
+  const parsed = parseInt(value || '', 10);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const toBool = (value: string | undefined, fallback: boolean) => {
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return fallback;
+};
+
 export default () => ({
-  port: parseInt(process.env.PORT, 10) || 4000,
+  port: toNumber(process.env.PORT, 4000),
   environment: process.env.NODE_ENV || 'development',
   
   // Database configuration
   database: {
+    url: process.env.DATABASE_URL,
     host: process.env.DATABASE_HOST || 'localhost',
-    port: parseInt(process.env.DATABASE_PORT, 10) || 5432,
+    port: toNumber(process.env.DATABASE_PORT, 5432),
     username: process.env.DATABASE_USERNAME || 'postgres',
-    password: process.env.DATABASE_PASSWORD || 'password',
+    password: process.env.DATABASE_PASSWORD,
     database: process.env.DATABASE_NAME || 'accu_platform',
-    synchronize: process.env.NODE_ENV === 'development',
-    logging: process.env.NODE_ENV === 'development',
+    synchronize: toBool(process.env.DATABASE_SYNCHRONIZE, process.env.NODE_ENV === 'development'),
+    logging: process.env.NODE_ENV !== 'production',
+    ssl: toBool(process.env.DATABASE_SSL, false),
+    runMigrations: toBool(process.env.DATABASE_MIGRATIONS_RUN, true),
   },
 
   // Redis configuration
@@ -22,20 +38,23 @@ export default () => ({
 
   // JWT configuration
   jwt: {
-    secret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production',
+    secret: process.env.JWT_SECRET,
     accessTokenExpiry: process.env.JWT_ACCESS_EXPIRY || '15m',
     refreshTokenExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
   },
 
   // File storage configuration
   fileStorage: {
-    provider: process.env.FILE_STORAGE_PROVIDER || 'local', // local, s3, minio
-    bucket: process.env.FILE_STORAGE_BUCKET || 'accu-platform',
-    endpoint: process.env.FILE_STORAGE_ENDPOINT || 'http://localhost:9000',
-    accessKeyId: process.env.FILE_STORAGE_ACCESS_KEY_ID || 'minioadmin',
-    secretAccessKey: process.env.FILE_STORAGE_SECRET_ACCESS_KEY || 'minioadmin',
+    provider: process.env.FILE_STORAGE_PROVIDER || (process.env.NODE_ENV === 'production' ? 's3' : 'local'), // local, s3, minio
+    bucket: process.env.FILE_STORAGE_BUCKET,
+    endpoint: process.env.FILE_STORAGE_ENDPOINT,
+    accessKeyId: process.env.FILE_STORAGE_ACCESS_KEY_ID,
+    secretAccessKey: process.env.FILE_STORAGE_SECRET_ACCESS_KEY,
     region: process.env.FILE_STORAGE_REGION || 'us-east-1',
-    maxFileSize: parseInt(process.env.MAX_FILE_SIZE, 10) || 50 * 1024 * 1024, // 50MB
+    baseUrl: process.env.FILE_BASE_URL,
+    uploadDir: process.env.FILE_UPLOAD_DIR || path.join(process.cwd(), 'uploads'),
+    maxFileSize: toNumber(process.env.MAX_FILE_SIZE, 50 * 1024 * 1024), // 50MB
+    storageQuota: toNumber(process.env.STORAGE_QUOTA, 1024 * 1024 * 1024),
   },
 
   // Email configuration
@@ -63,7 +82,7 @@ export default () => ({
 
   // CORS
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   },
 

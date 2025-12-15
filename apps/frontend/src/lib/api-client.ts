@@ -6,7 +6,15 @@ class ApiClient {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const configuredBaseUrl =
+      process.env.NEXT_PUBLIC_API_URL ||
+      (process.env.NODE_ENV === 'development' ? 'http://localhost:4000/api' : '');
+
+    if (!configuredBaseUrl) {
+      throw new Error('NEXT_PUBLIC_API_URL is required at build/runtime.');
+    }
+
+    this.baseURL = configuredBaseUrl.replace(/\/$/, '');
     this.instance = axios.create({
       baseURL: this.baseURL,
       timeout: 30000,

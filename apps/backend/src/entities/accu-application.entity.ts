@@ -50,8 +50,11 @@ export class AccuApplication {
   @Column({ nullable: true })
   serReference: string;
 
-  @Column({ type: 'jsonb' })
+  @Column({ type: 'jsonb', nullable: true })
   applicationData: Record<string, any>;
+
+  @Column({ type: 'jsonb', nullable: true })
+  metadata: Record<string, any>;
 
   @Column({ nullable: true })
   tenantId: string;

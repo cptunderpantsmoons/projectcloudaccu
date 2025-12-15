@@ -16,21 +16,34 @@ import { IStorageProvider } from './storage-provider.interface';
     {
       provide: 'STORAGE_PROVIDER',
       useFactory: (configService: ConfigService): IStorageProvider => {
-        const provider = configService.get<string>('fileStorage.provider', 'local');
-        
+        const provider = configService.get<string>('fileStorage.provider') || 'local';
+        const environment = configService.get<string>('environment') || 'development';
+
+        if (environment === 'production' && provider === 'local') {
+          throw new Error('Local storage provider is not allowed in production. Set FILE_STORAGE_PROVIDER to s3 or minio.');
+        }
+
         if (provider === 's3' || provider === 'minio') {
+          const bucket = configService.get<string>('fileStorage.bucket');
+          const accessKeyId = configService.get<string>('fileStorage.accessKeyId');
+          const secretAccessKey = configService.get<string>('fileStorage.secretAccessKey');
+
+          if (!bucket || !accessKeyId || !secretAccessKey) {
+            throw new Error('Storage credentials are missing. Set FILE_STORAGE_BUCKET, FILE_STORAGE_ACCESS_KEY_ID, and FILE_STORAGE_SECRET_ACCESS_KEY.');
+          }
+
           return new S3StorageProvider(
-            configService.get<string>('fileStorage.bucket'),
+            bucket,
             configService.get<string>('fileStorage.region'),
             configService.get<string>('fileStorage.endpoint'),
-            configService.get<string>('fileStorage.accessKeyId'),
-            configService.get<string>('fileStorage.secretAccessKey'),
+            accessKeyId,
+            secretAccessKey,
           );
         }
         
         return new LocalStorageProvider(
-          process.env.FILE_UPLOAD_DIR || './uploads',
-          process.env.FILE_BASE_URL || 'http://localhost:4000/files'
+          configService.get<string>('fileStorage.uploadDir') || './uploads',
+          configService.get<string>('fileStorage.baseUrl') || 'http://localhost:4000/files'
         );
       },
       inject: [ConfigService],

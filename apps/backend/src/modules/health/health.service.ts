@@ -1,0 +1,23 @@
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+
+@Injectable()
+export class HealthService {
+  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+
+  async check() {
+    let database = 'up';
+    try {
+      await this.dataSource.query('SELECT 1');
+    } catch (error) {
+      database = 'down';
+    }
+
+    return {
+      status: database === 'up' ? 'ok' : 'degraded',
+      database,
+      timestamp: new Date().toISOString(),
+    };
+  }
+}

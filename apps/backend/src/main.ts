@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
-import * as helmet from 'helmet';
+import helmet from 'helmet';
 
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -12,8 +12,18 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
   const configService = app.get(ConfigService);
+  const logger = new Logger('Bootstrap');
+
+  app.enableShutdownHooks();
+  app.useLogger(logger);
+
+  const jwtSecret = configService.get<string>('jwt.secret');
+  if (!jwtSecret) {
+    logger.error('JWT_SECRET is not set. Refusing to start without a signing key.');
+    process.exit(1);
+  }
 
   // Security middleware
   app.use(helmet());
@@ -21,11 +31,12 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // CORS configuration
+  const corsOrigin = configService.get('cors.origin');
+  const corsOrigins = Array.isArray(corsOrigin)
+    ? corsOrigin
+    : (corsOrigin as string | undefined)?.split(',').map((origin) => origin.trim()).filter(Boolean);
   app.enableCors({
-    origin: [
-      configService.get('FRONTEND_URL', 'http://localhost:3000'),
-      'http://localhost:3000',
-    ],
+    origin: corsOrigins && corsOrigins.length > 0 ? corsOrigins : ['http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -54,7 +65,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // Swagger documentation
-  if (configService.get('NODE_ENV') !== 'production') {
+  if (configService.get('environment') !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('ACCU Platform API')
       .setDescription('Australian Carbon Credit Units Platform API Documentation')
@@ -89,14 +100,17 @@ async function bootstrap() {
     });
   }
 
-  const port = configService.get('PORT', 4000);
-  await app.listen(port);
+  const port = configService.get<number>('port', 4000) || configService.get<number>('PORT', 4000);
+  await app.listen(port, '0.0.0.0');
 
-  console.log(`🚀 ACCU Platform API is running on: http://localhost:${port}`);
-  console.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
+  logger.log(`🚀 ACCU Platform API is running on: http://0.0.0.0:${port}`);
+  if (configService.get('environment') !== 'production') {
+    logger.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
+  }
 }
 
 bootstrap().catch((error) => {
-  console.error('❌ Error starting server:', error);
+  const logger = new Logger('Bootstrap');
+  logger.error(`❌ Error starting server: ${error.message}`, error.stack);
   process.exit(1);
 });

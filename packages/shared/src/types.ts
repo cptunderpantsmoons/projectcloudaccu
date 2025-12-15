@@ -330,22 +330,28 @@ export const Notification = z.object({
 export type Notification = z.infer<typeof Notification>;
 
 // API Response Types
-export const ApiResponse<T> = z.object({
+export const ApiResponse = z.object({
   success: z.boolean(),
-  data: z.any().optional(),
-  error: z.object({
-    code: z.string(),
-    message: z.string(),
-    details: z.record(z.any()).optional(),
-  }).optional(),
-  pagination: z.object({
-    page: z.number(),
-    limit: z.number(),
-    total: z.number(),
-    pages: z.number(),
-  }).optional(),
+  data: z.unknown().optional(),
+  error: z
+    .object({
+      code: z.string(),
+      message: z.string(),
+      details: z.record(z.any()).optional(),
+    })
+    .optional(),
+  pagination: z
+    .object({
+      page: z.number(),
+      limit: z.number(),
+      total: z.number(),
+      pages: z.number(),
+    })
+    .optional(),
 });
-export type ApiResponse<T> = z.infer<typeof ApiResponse<T>>;
+export type ApiResponse<T = unknown> = Omit<z.infer<typeof ApiResponse>, 'data'> & {
+  data?: T;
+};
 
 // Query & Filter Types
 export const QueryOptions = z.object({
